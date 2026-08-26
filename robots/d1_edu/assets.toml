@@ -1,0 +1,135 @@
+# 智元 D1 edu · 资产登记与拍板参数
+#
+# 规矩：只增不改。数值修订时新增一行并注明日期，不覆盖旧值。
+# 这份文件是「这台机器人的事实来源」，写配置时查它，不凭记忆。
+
+[robot]
+name       = "d1_edu"
+full_name  = "智元 D1 edu（AgiBot D1 Edu-Ultra）"
+dof        = 12
+total_mass = 15.1862   # kg，取自 URDF；真机实测重量待核（钉子 D13）
+thigh_len  = 0.2       # m
+shank_len  = 0.21366   # m
+# 坐标约定（由四条腿挂载点坐标反推）：X 朝前，Y 朝左，Z 朝上
+
+# ─────────────────────────────────────────────────────────────
+[sdk]
+repo        = "https://github.com/AgibotTech/agibot_D1_Edu-Ultra.git"
+commit      = "b5fe0a86094507238944ad118721376a98615ac0"
+commit_date = "2026-08-14T17:46:09+08:00"
+path_ubuntu = "~/self-AGI/agibot_D1_Edu-Ultra"
+path_mac    = "/Users/a117/self-AGI/agibot_D1_Edu-Ultra"
+key_header  = "include/lowlevel/lowlevel.h"
+verified    = "2026-08-27"
+
+[sdk.lowlevel]
+# 电机侧执行 τ = kp(p_des − p) + kd(v_des − v) + t_ff
+# 与 Isaac Lab ImplicitActuatorCfg 逐项对应，策略输出目标角直接填 p_des
+control_struct = "joint_control_t { p_des, v_des, kp, kd, t_ff }"
+transport      = "POSIX 共享内存 /spline_shm（控制+状态）、/imu_shm（IMU）"
+tick_hz        = 1000
+watchdog_ms    = 10      # 连续约 10 周期无新指令 → 清除电机控制指令（钉子 D10）
+min_write_hz   = 100     # 由 watchdog 反推的写入下限；策略 50 Hz 不够，需独立写入线程
+imu_fields     = "acc[3], gyro[3], q[4](w,x,y,z, zyx 序)"
+imu_missing    = "本体线速度 —— 观测集因此不含 base_lin_vel（钉子 D11）"
+joint_state    = "p(rad), v(rad/s), t(N·m 实测扭矩), flags(电压/温度/故障位)"
+remote_capable = false   # 共享内存是本机 IPC，推理必须在机载跑（钉子 D12）
+
+# ─────────────────────────────────────────────────────────────
+[urdf]
+path_ubuntu  = "~/self-AGI/urdf/edu_description/urdf/edu.urdf"
+path_mac     = "/Users/a117/self-AGI/urdf/edu_description/urdf/edu.urdf"
+mesh_dir     = "../meshes"   # URDF 内为相对路径，目录结构不可拆散
+mesh_count   = 17
+mesh_size_mb = 29.20
+version_ctrl = "无 .git，供应商直给"
+checked      = "2026-08-27"
+check_tool   = "tools/urdf_doctor.py"
+check_result = "0 ERROR / 0 WARN / 17 INFO（碰撞体为三角网格）"
+note_csv     = "同目录 edu.csv 是过期的 SolidWorks 导出，与 URDF 四处冲突（effort、HIP 限位、KNEE 轴符号、各 link 质量），一律以 URDF 为准"
+
+[urdf.joint_limits]   # 12 个驱动关节参数完全一致
+effort   = 48.0    # N·m
+velocity = 28.0    # rad/s
+abad     = [-0.4887,  0.4887]   # rad，约 ±28°
+hip      = [-1.1519,  2.9670]
+knee     = [-2.7230, -0.6020]   # 全负
+
+[urdf.joint_axes]
+abad = [1, 0, 0]
+hip  = [0, 1, 0]
+knee = [0, 1, 0]
+
+# ─────────────────────────────────────────────────────────────
+[usd]
+path             = "robots/d1_edu/assets/usd/d1_edu.usd"
+official_usd     = false   # 厂家未提供，必须自行转换
+generated_by     = "IsaacLab scripts/tools/convert_urdf.py"
+isaaclab_version = "0.54.3"
+isaacsim_version = "5.1"
+
+# 完整转换命令。重转时原样复制，不要凭记忆敲——六个参数任何一个不同都会得到
+# 行为不同的 USD，而且事后查不出差在哪。
+command = '''
+python ~/IsaacLab/scripts/tools/convert_urdf.py \
+  ~/self-AGI/urdf/edu_description/urdf/edu.urdf \
+  ~/sim2real-deploy/robots/d1_edu/assets/usd/d1_edu.usd \
+  --joint-stiffness 25.0 \
+  --joint-damping 0.6 \
+  --joint-target-type position \
+  --headless
+'''
+
+[usd.flags_rationale]
+merge_joints = "不加。它会把固定关节连接的 link 合并成一个刚体，四个 FOOT_LINK 会消失，导致 feet_air_time、undesired_contacts 等按名字引用足端的奖励项全部失效"
+fix_base     = "不加。它把机身固定在世界系，那是机械臂用法，四足需要浮动基座"
+stiffness    = "显式覆盖。脚本默认 100.0，不是我们要的值"
+damping      = "显式覆盖。脚本默认 1.0，不是我们要的值"
+collision    = "CLI 不暴露碰撞近似参数。Isaac Sim 的 URDF 导入器对网格碰撞体默认用凸包，正是所需。要改（如足端换球体）须绕开 CLI 直接调 UrdfConverterCfg"
+
+# ─────────────────────────────────────────────────────────────
+[actuator]   # 拍板 2026-08-27
+effort_limit   = 48.0
+velocity_limit = 28.0
+stiffness      = 25.0
+damping        = 0.6
+randomize_pct  = 0.30   # stiffness 与 damping 同时 ±30%
+rationale      = "官方未给 PD 增益（SDK 文档与 edu.csv 均无）。取值依据：① 同级参考机（12 kg 级四足，25/0.5）同量级，D1 更重更强故略上调 ② 由 URDF 惯量算得膝关节有效惯量 0.00648 kg·m²，临界阻尼 kd=0.81，取 0.6 落欠阻尼区，符合 locomotion 需要顺应性吸收着地冲击 ③ kp=25 下 0.2 rad 误差仅产生 5 N·m，离 48 上限很远"
+
+# ─────────────────────────────────────────────────────────────
+[default_joint_pos]   # 由正运动学验算确定，非猜测
+abad = 0.0
+hip  = 0.8
+knee = -1.5
+base_height = 0.303   # m，足端落在髋关节正下方时的机身高度，直接用作奖励项 base_height_target
+note = "代入 HIP=0.8/KNEE=-1.5 算得足端 x≈-0.005, z≈-0.303；若用 edu.csv 的 KNEE 轴 (0,-1,0) 则得 x≈-0.303, z≈+0.003（脚甩到身后同高，荒谬）—— 这是判定 URDF 权威、CSV 过期的依据。同时确定 HIP 正方向 = 大腿向后摆"
+
+# ─────────────────────────────────────────────────────────────
+[observation]   # 45 维，每一项在实机上都有来源（钉子 D11）
+dim = 45
+terms = [
+  "base_ang_vel      3   ← IMU gyro[3]",
+  "projected_gravity 3   ← IMU q[4] 旋转世界重力 (0,0,-1) 到机身系",
+  "velocity_commands 3   ← 遥控器",
+  "joint_pos_rel     12  ← SDK joint_state.p 减默认角",
+  "joint_vel         12  ← SDK joint_state.v",
+  "last_action       12  ← 自行缓存",
+]
+excluded = "base_lin_vel（IMU 不提供，见 sdk.lowlevel.imu_missing）；height_scan（只训平地，且无深度相机）"
+normalization = "关闭 rsl_rl 经验归一化，改固定缩放系数写死（钉子 D07）。系数待定，定后 dump 进 docs/contracts/"
+critic = "非对称 actor-critic：critic 吃特权观测（含真值线速度），actor 只吃这 45 维"
+
+# ─────────────────────────────────────────────────────────────
+[joint_order]
+# 三套顺序两两不同，映射表必须由脚本自动生成，禁止人肉誊写（钉子 D06）
+urdf = "腿序 FL→FR→RR→RL，腿内 ABAD→HIP→KNEE"
+sdk  = "腿序 FR=0→FL=1→RR=2→RL=3，腿内 abad→hip→knee→foot（foot 为固定关节，占结构体槽位但不驱动）"
+isaac_lab = "未测。预计按广度优先分层重排（四个 ABAD→四个 HIP→四个 KNEE）。推测值禁止使用，须打 robot.joint_names 实测"
+warning = "URDF 与 SDK 的前两条腿左右相反；Isaac Lab 与二者的分组方式都不同（按关节层 vs 按腿）"
+
+# ─────────────────────────────────────────────────────────────
+[env]
+train        = "conda env_all_pro（Ubuntu）：Python 3.11.15、torch 2.7.0+cu128、Isaac Sim 5.1、Isaac Lab 0.54.3。已跑通同类任务，本轮零改动"
+deploy       = "conda d1_deploy：Python 3.11 + torch 2.7.0 CPU + numpy + mujoco。不装 isaaclab、不装 rsl_rl —— 能在此环境加载成功即为交付验收"
+onboard      = "未知。架构 / OS / Python / 能否装 torch 均待查（钉子 D12，8/28 收货首查，不通则实机路线归零）"
+train_machine = "Ubuntu，Tailscale 100.108.244.47，SSH 别名 desktop，用户 lqm"
