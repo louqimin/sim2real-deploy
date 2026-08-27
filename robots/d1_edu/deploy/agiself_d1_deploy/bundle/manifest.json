@@ -1,0 +1,41 @@
+{
+  "robot": "d1_edu",
+  "generated_by": "AGIself_make_bundle.py",
+  "created_local": "2026-08-27T20:59:32+08:00",
+  "source_run_dir": "/home/lqm/sim2real-deploy/logs/rsl_rl/agiself_d1_edu_flat/2026-08-27_16-27-07",
+  "contracts_dir": "/home/lqm/sim2real-deploy/docs/contracts",
+  "git": {
+    "commit": "8d19d1f7013ff7f9e2feaa7beab4a082db2c1215",
+    "dirty": true
+  },
+  "names": {
+    "policy": "policy.onnx",
+    "obs_contract": "d1_edu_obs_contract.json",
+    "joint_map": "d1_edu_joint_map.json",
+    "policy_ref_pt": "policy.pt"
+  },
+  "files": {
+    "policy.onnx": {
+      "sha256": "d7282cadde38f77fe4807b21531eb9751a36fcc98aa43fe83505f812d3d3538f",
+      "bytes": 162985,
+      "source": "/home/lqm/sim2real-deploy/logs/rsl_rl/agiself_d1_edu_flat/2026-08-27_16-27-07/exported/policy.onnx"
+    },
+    "policy.pt": {
+      "sha256": "18218e5fbd4e36476171c4a29ba406669af619b54c40c688fd04aca9cb17c95a",
+      "bytes": 173868,
+      "source": "/home/lqm/sim2real-deploy/logs/rsl_rl/agiself_d1_edu_flat/2026-08-27_16-27-07/exported/policy.pt"
+    },
+    "d1_edu_obs_contract.json": {
+      "sha256": "28e420a4510acfd0c5f35d050e98ee6e8270a316d0b0103083547711bd0ab6f9",
+      "bytes": 5842,
+      "source": "/home/lqm/sim2real-deploy/docs/contracts/d1_edu_obs_contract.json"
+    },
+    "d1_edu_joint_map.json": {
+      "sha256": "4d7d38446bb7e28e7437b58fe77578e5fa50f707efc7a5f085e40ab85d62f788",
+      "bytes": 6113,
+      "source": "/home/lqm/sim2real-deploy/docs/contracts/d1_edu_joint_map.json"
+    }
+  },
+  "note": "第二轮：恢复 undesired_contacts 到 [KNEE_LINK, HIP_LINK] 权重-1.0，步态正确",
+  "warning": "禁止手工编辑本目录下任何文件；要换策略就重跑 AGIself_make_bundle.py。"
+}

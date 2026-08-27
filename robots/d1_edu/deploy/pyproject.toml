@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agiself-d1-deploy"
+version = "0.1.0"
+description = "D1 edu 四足 · PPO locomotion 部署侧运行时（零 Isaac Lab、零 torch）"
+requires-python = ">=3.8"
+
+# 运行时依赖只有这两个，是交付条 D2「可脱离 Isaac Lab 加载」的结构性保证：
+# 写错了连装都装不上。torch 也刻意不在这里 —— 板载计算机（D12）能不能装 torch
+# 至今未知，把运行时钉在 onnxruntime 上，这条风险就与交付线彻底脱钩。
+dependencies = [
+    "numpy>=1.20",
+    "onnxruntime>=1.12",
+]
+
+[project.optional-dependencies]
+# 只有在训练机上做 ONNX ↔ TorchScript 对账时才需要。板子上永远不装。
+refcheck = ["torch>=2.0"]
+
+[tool.setuptools.packages.find]
+include = ["agiself_d1_deploy*"]
+
+[tool.setuptools.package-data]
+agiself_d1_deploy = ["bundle/*"]
