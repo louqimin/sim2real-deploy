@@ -1,11 +1,11 @@
 {
   "robot": "d1_edu",
   "generated_by": "AGIself_make_bundle.py",
-  "created_local": "2026-08-27T20:59:32+08:00",
-  "source_run_dir": "/home/lqm/sim2real-deploy/logs/rsl_rl/agiself_d1_edu_flat/2026-08-27_16-27-07",
+  "created_local": "2026-08-30T10:26:27+08:00",
+  "source_run_dir": "/home/lqm/sim2real-deploy/logs/rsl_rl/agiself_d1_edu_flat/2026-08-30_08-59-30",
   "contracts_dir": "/home/lqm/sim2real-deploy/docs/contracts",
   "git": {
-    "commit": "8d19d1f7013ff7f9e2feaa7beab4a082db2c1215",
+    "commit": "a529952e3728564cc0fea8224339e1cfc532a001",
     "dirty": true
   },
   "names": {
@@ -16,18 +16,18 @@
   },
   "files": {
     "policy.onnx": {
-      "sha256": "d7282cadde38f77fe4807b21531eb9751a36fcc98aa43fe83505f812d3d3538f",
+      "sha256": "95a761acdf37bc3d5f3d68a126b56f5baa1db6e7fae0dd55a36f35919add6841",
       "bytes": 162985,
-      "source": "/home/lqm/sim2real-deploy/logs/rsl_rl/agiself_d1_edu_flat/2026-08-27_16-27-07/exported/policy.onnx"
+      "source": "/home/lqm/sim2real-deploy/logs/rsl_rl/agiself_d1_edu_flat/2026-08-30_08-59-30/exported/policy.onnx"
     },
     "policy.pt": {
-      "sha256": "18218e5fbd4e36476171c4a29ba406669af619b54c40c688fd04aca9cb17c95a",
+      "sha256": "5cffceb2cd9dc8c05aab1480b3401b102d41b576500731d26db0c2a6c6ce2aae",
       "bytes": 173868,
-      "source": "/home/lqm/sim2real-deploy/logs/rsl_rl/agiself_d1_edu_flat/2026-08-27_16-27-07/exported/policy.pt"
+      "source": "/home/lqm/sim2real-deploy/logs/rsl_rl/agiself_d1_edu_flat/2026-08-30_08-59-30/exported/policy.pt"
     },
     "d1_edu_obs_contract.json": {
-      "sha256": "28e420a4510acfd0c5f35d050e98ee6e8270a316d0b0103083547711bd0ab6f9",
-      "bytes": 5842,
+      "sha256": "eff1e43b64f8bfab019590a3c841af91d994236c1b0de107dc4dee942ebb23c7",
+      "bytes": 5844,
       "source": "/home/lqm/sim2real-deploy/docs/contracts/d1_edu_obs_contract.json"
     },
     "d1_edu_joint_map.json": {
@@ -36,6 +36,6 @@
       "source": "/home/lqm/sim2real-deploy/docs/contracts/d1_edu_joint_map.json"
     }
   },
-  "note": "第二轮：恢复 undesired_contacts 到 [KNEE_LINK, HIP_LINK] 权重-1.0，步态正确",
+  "note": "R3：feet_air_time 门槛 0.3→0.1 ＋ 新增 feet_slide -0.25；探针实测四腿 trot，s̄ 1.298→0.111，占空比 0.88→0.60",
   "warning": "禁止手工编辑本目录下任何文件；要换策略就重跑 AGIself_make_bundle.py。"
 }

@@ -3,7 +3,7 @@
 """让 D1 edu 用默认关节角在平地上站一秒，看它站不站得住。
 
 这个脚本回答一个仿真里唯一能回答、但不问就一直悬着的问题：
-    AGIself_robot_cfg.py 里那组默认关节角（ABAD 0.0 / HIP 0.8 / KNEE -1.5），
+    AGIself_robot_cfg.py 里那组默认关节角，
     在 D1 的实际符号约定下，究竟是「站着」还是「腿朝天翻过去」？
 
 判据（不接受「看起来跑起来了」）：
@@ -71,7 +71,22 @@ def main():
     h_std = float(torch.tensor(heights).std())
 
     print("\n" + "=" * 62)
-    print(f"默认关节角     : ABAD 0.0 / HIP 0.8 / KNEE -1.5")
+    # 从仿真读回实际生效的默认角，不写死字面量。
+    # 与上面 target = robot.data.default_joint_pos.clone() 同源，
+    # 所以打印的就是 PD 正在保持的那组数，不存在「显示与实际分叉」的可能。
+    #
+    # 2026-08-29 教训：这里原本硬编码 "ABAD 0.0 / HIP 0.8 / KNEE -1.5"，
+    # 而当天后腿 HIP 已改成 1.2 —— 一个验证工具报错了自己的输入。
+    # 那份输出贴进档案就是「HIP 0.8 配 z=-0.9999」这种不存在的组合，且看不出破绽。
+    _names = getattr(robot.data, "joint_names", None) or robot.joint_names
+    _defaults = robot.data.default_joint_pos[0].tolist()
+    print("默认关节角（仿真读回）:")
+    for _i in range(0, len(_names), 4):
+        _row = "  ".join(
+            f"{_n.replace('_JOINT', ''):<8}{_v:+.3f}"
+            for _n, _v in zip(_names[_i:_i + 4], _defaults[_i:_i + 4])
+        )
+        print(f"  {_row}")
     print(f"稳态机身高度   : {h:.4f} m   (标准差 {h_std:.4f})")
     print(f"重力机体系 z   : {g:.4f}     (-1.0 = 完全水平)")
     print("-" * 62)
